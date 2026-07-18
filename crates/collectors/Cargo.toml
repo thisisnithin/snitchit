@@ -1,0 +1,42 @@
+[package]
+name = "snitchit-collectors"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Event collectors for snitchit: PTY wrapper and agent hooks (Claude Code, OpenCode). Each implements EventSource."
+
+[dependencies]
+snitchit-core.workspace = true
+thiserror.workspace = true
+crossbeam-channel.workspace = true
+portable-pty.workspace = true
+crossterm.workspace = true
+
+# SIGWINCH resize watching (Unix only — Windows has no such signal; the PTY
+# collector polls crossterm::terminal::size() there instead, see pty.rs).
+[target.'cfg(unix)'.dependencies]
+signal-hook = "0.3"
+
+# Kernel-observation collector (eBPF). Linux-only: aya is a userspace loader; the
+# BPF bytecode is vendored (src/sources/kernel/snitchit.ebpf.o), so this builds on stable
+# with no bpf-linker/nightly. Gated so macOS/Windows never pull it in.
+[target.'cfg(target_os = "linux")'.dependencies]
+aya = "0.13"
+
+# macOS kernel tier. All three crates expose safe APIs that isolate their FFI,
+# so the collector modules contain no unsafe and the workspace-wide
+# unsafe_code = "forbid" is untouched. Gated so Linux/Windows never pull them in.
+#   endpoint-sec: exec capture via the ES C framework (macos_13_0_0 sets a
+#     Ventura+ baseline; only exec/fork accessors, present since 10.15, are used).
+#   netstat2 + libproc: outbound-connection capture via socket-table + process-
+#     table polling (no entitlement, no root for the agent's own tree). See
+#     src/sources/macos_connect.
+[target.'cfg(target_os = "macos")'.dependencies]
+endpoint-sec = { version = "0.6", features = ["macos_13_0_0"] }
+netstat2 = "0.11"
+libproc = "0.14"
+
+[lints]
+workspace = true

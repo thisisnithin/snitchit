@@ -1,0 +1,259 @@
+/* snitchit view — inlined, no external stylesheets/fonts (offline by design).
+ *
+ * Dark, Geist-inspired (vercel.com/design): near-black surfaces, hairline
+ * borders, restrained color used only to signal state. The timeline is a real
+ * table so columns align down the page. Geist Sans/Mono are named first and
+ * fall back to system fonts (the file ships no webfonts). */
+
+:root {
+  --bg: #000000;
+  --panel: #0a0a0a;
+  --panel-hi: #141414;
+  --border: #242424;
+  --border-hover: #343434;
+
+  --text: #ededed;
+  --secondary: #a1a1a1;
+  --muted: #7d7d7d;
+  --faint: #565656;
+
+  --accent: #3b82f6;
+  --neutral: #1f1f1f;
+
+  --ok: #4ade80;
+  --ok-bg: rgba(74, 222, 128, 0.12);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.13);
+  --amber: #fbbf24;
+  --amber-bg: rgba(251, 191, 36, 0.13);
+
+  --sev-info: #7d7d7d;
+  --sev-low: #60a5fa;
+  --sev-medium: #fbbf24;
+  --sev-high: #fb923c;
+  --sev-critical: #f87171;
+
+  --radius: 8px;
+  --sans: "Geist", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: dark; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app { max-width: 1080px; margin: 0 auto; padding: 40px 24px 96px; }
+
+/* ---- header ---------------------------------------------------------------- */
+
+header#header { margin-bottom: 24px; }
+header#header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+#session-meta {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 6px 0 16px;
+  word-break: break-all;
+}
+
+#chain-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  font-size: 13px;
+}
+#chain-banner .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
+#chain-banner.intact { color: var(--ok); }
+#chain-banner.broken { color: var(--err); border-color: color-mix(in srgb, var(--err) 35%, var(--border)); }
+
+/* ---- filter bar ------------------------------------------------------------ */
+
+section#controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+.control-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.control-label {
+  font-size: 11px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--faint);
+}
+.control-group label {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 13px; white-space: nowrap; cursor: pointer; color: var(--secondary);
+}
+.control-group label:hover { color: var(--text); }
+.control-group input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; }
+
+.control-search { flex: 1; min-width: 220px; }
+#f-search, select#f-status, select#f-severity {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.4;
+  font-family: var(--sans);
+  padding: 7px 11px;
+}
+select#f-status, select#f-severity { padding-right: 8px; }
+#f-search { width: 100%; font-family: var(--mono); }
+#f-search::placeholder { color: var(--faint); }
+#f-search:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  border-color: transparent;
+}
+
+#count { font-family: var(--mono); font-size: 12px; color: var(--faint); margin: 0 2px 12px; }
+
+/* ---- timeline table -------------------------------------------------------- */
+
+main#timeline {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--panel);
+}
+
+table.log { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+table.log thead th {
+  text-align: left;
+  font-size: 10.5px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--faint);
+  padding: 10px 12px;
+  background: var(--panel-hi);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+table.log td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+table.log tbody tr:last-child td { border-bottom: none; }
+
+tr.record { cursor: pointer; transition: background 150ms cubic-bezier(0.175, 0.885, 0.32, 1.1); }
+tr.record:hover, tr.record.expanded { background: var(--panel-hi); }
+
+.col-ts span { font-family: var(--mono); font-size: 12px; color: var(--faint); }
+/* tool takes the remaining width and truncates (max-width:0 + width:100%);
+   the full command is in the expanded "Input" row. */
+.col-tool {
+  width: 100%;
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.col-tool .tool-name { font-family: var(--mono); font-weight: 500; font-size: 13px; color: var(--text); }
+
+/* source/type: uniform, subtle, monochrome outlined pills — the label carries
+   the meaning, not the color (à la Vercel's "Production" tag) */
+.badge {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  padding: 2px 9px; border-radius: 9999px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border);
+  color: var(--secondary);
+  white-space: nowrap;
+}
+
+/* outcome: a glyph + calm label. Success is unremarkable; only problems draw
+   color, so a healthy log stays quiet. */
+.status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--secondary); white-space: nowrap;
+  text-transform: capitalize;
+}
+.status-pill::before { font-size: 12px; line-height: 1; color: var(--muted); }
+.status-pill.ok::before { content: "\2713"; }               /* ✓ check */
+.status-pill.error::before { content: "\2715"; color: var(--err); }   /* ✕ cross */
+.status-pill.denied::before { content: "\2298"; color: var(--amber); } /* ⊘ no-entry */
+.status-pill.none { color: var(--faint); }
+
+/* severity: plain label, muted by default; only elevated levels take color, in
+   the same amber/red as the status dots (one coherent alert palette) */
+.severity-pill {
+  font-size: 11px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  white-space: nowrap; color: var(--muted);
+}
+.severity-pill.sev-high { color: var(--amber); }
+.severity-pill.sev-critical { color: var(--err); }
+
+/* ---- expanded detail row --------------------------------------------------- */
+
+tr.detail-row > td { background: var(--bg); padding: 14px 16px; white-space: normal; }
+
+.detail-field { margin-bottom: 12px; }
+.detail-field:last-child { margin-bottom: 0; }
+.detail-field .label {
+  font-size: 11px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--faint); margin-bottom: 4px;
+}
+.detail-field .value {
+  font-family: var(--mono); font-size: 12.5px; color: var(--text);
+  white-space: pre-wrap; word-break: break-all;
+}
+
+.findings { display: flex; flex-direction: column; gap: 5px; }
+.findings .none { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.finding-row {
+  display: flex; gap: 9px; align-items: baseline;
+  font-family: var(--mono); font-size: 12px; color: var(--text);
+  background: var(--err-bg); border-radius: 5px; padding: 5px 9px;
+}
+.finding-row .fkind { font-weight: 600; color: var(--err); }
+
+.hash-grid {
+  display: grid; grid-template-columns: max-content 1fr; gap: 5px 12px;
+  font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+}
+.hash-grid .k { text-align: right; color: var(--faint); }
+.hash-grid .v { word-break: break-all; }
+
+#empty-state {
+  color: var(--muted); padding: 44px 0; text-align: center;
+  font-size: 13px;
+}
+
+footer#footer { margin-top: 28px; font-size: 12px; color: var(--faint); text-align: center; }
+
+/* ---- responsive + a11y floor ---------------------------------------------- */
+
+@media (max-width: 680px) {
+  #app { padding: 28px 14px 64px; }
+  main#timeline { overflow-x: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* biome-ignore lint/complexity/noImportantStyles: intentional, must beat any transition */
+  * { transition: none !important; }
+}

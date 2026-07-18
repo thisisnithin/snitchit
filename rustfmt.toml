@@ -1,0 +1,3 @@
+# Defaults are deliberate. Stable-only options so `cargo fmt --check` is clean
+# on the pinned stable toolchain (no nightly-gated keys).
+edition = "2021"

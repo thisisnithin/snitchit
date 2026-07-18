@@ -1,0 +1,23 @@
+[package]
+name = "snitchit-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Core types, RFC 8785 canonicalization, and the tamper-evident hash chain for snitchit."
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+hex.workspace = true
+regex.workspace = true
+uuid.workspace = true
+time.workspace = true
+thiserror.workspace = true
+dirs.workspace = true
+crossbeam-channel.workspace = true
+
+[lints]
+workspace = true

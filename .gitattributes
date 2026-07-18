@@ -1,0 +1,3 @@
+# The tool targets Unix; keep the repo LF-normalized everywhere.
+* text=auto eol=lf
+*.rs text eol=lf

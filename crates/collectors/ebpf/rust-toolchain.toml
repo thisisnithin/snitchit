@@ -1,0 +1,6 @@
+# eBPF programs require nightly (build-std) + rust-src. This pin applies only to
+# this excluded crate; the rest of the repo stays on stable (see root
+# rust-toolchain.toml).
+[toolchain]
+channel = "nightly"
+components = ["rust-src"]

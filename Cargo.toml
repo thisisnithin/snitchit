@@ -1,0 +1,82 @@
+[workspace]
+resolver = "2"
+members = ["crates/core", "crates/collectors", "crates/agents", "crates/cli"]
+# The eBPF kernel programs are a separate nightly/bpf-linker build (their object
+# is vendored into the collectors crate). Excluded so the stable workspace build,
+# `cargo clippy --all-features`, and non-Linux CI never touch them.
+exclude = ["crates/collectors/ebpf"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.89"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/thisisnithin/snitchit"
+description = "Local-first, observe-only, tamper-evident recorder for terminal AI coding agents."
+
+# Shared dependency versions. Member crates opt in with `foo.workspace = true`.
+[workspace.dependencies]
+snitchit-core = { path = "crates/core", version = "0.1.0" }
+snitchit-collectors = { path = "crates/collectors", version = "0.1.0" }
+snitchit-agents = { path = "crates/agents", version = "0.1.0" }
+
+# Serialization / hashing / encoding (the integrity core).
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+hex = "0.4"
+regex = "1"
+uuid = { version = "1", features = ["v4"] }
+time = { version = "0.3", features = ["formatting", "parsing", "macros"] }
+
+# Error handling: thiserror in libraries, anyhow in the binary.
+thiserror = "2"
+anyhow = "1"
+
+# CLI + platform helpers.
+clap = { version = "4", features = ["derive"] }
+dirs = "6"
+crossbeam-channel = "0.5"
+
+# PTY collector (wezterm's portable-pty; ConPTY on Windows, forkpty on Unix).
+portable-pty = "0.9"
+# Cross-platform raw mode + terminal size for transparent passthrough.
+crossterm = "0.29"
+
+[workspace.lints.rust]
+warnings = "warn"
+missing_docs = "allow"
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Pedantic lints that are genuinely noisy for this codebase, each justified:
+# We prefer explicit module paths in a small crate; re-export churn isn't worth it.
+module_name_repetitions = "allow"
+# Error enums are documented at the type level; per-variant `# Errors` is redundant here.
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+# `format!`-in-`push_str` and single-char patterns read fine at MVP scale.
+uninlined_format_args = "allow"
+# Trait methods return `&str` (tied to `&self`); impls returning a literal
+# shouldn't be forced to `&'static str` — the trait, not the impl, owns the sig.
+unnecessary_literal_bound = "allow"
+# `program`/`program_path` and friends are the clearest names; the similarity
+# lint fights descriptive naming more than it helps.
+similar_names = "allow"
+
+# Design principle #1 (observe-only): no fallible-path panics in shipped code.
+# Denied outright (not just warned) so a stray unwrap fails the build, not just
+# CI. `clippy.toml` re-permits unwrap/expect in test code.
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+# No stubs or unreachable-by-assumption branches in shipped code either.
+todo = "deny"
+unimplemented = "deny"
+unreachable = "deny"
+
+[profile.release]
+lto = "thin"
+strip = true

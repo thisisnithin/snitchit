@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # `snitchit` targets Unix (macOS + Linux). The Windows runner is intentionally
+  # omitted (see brief §2, §8.6); the code still compiles on Windows for local dev.
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Format check
+        run: cargo fmt --all -- --check
+
+      - name: Clippy (deny warnings)
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Test
+        run: cargo test --all
+
+      - name: Build release
+        run: cargo build --release
+
+  publish-check:
+    name: publish dry-run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: cargo publish --dry-run (in dependency order)
+        run: |
+          set -u
+          for crate in snitchit-core snitchit-agents snitchit-collectors snitchit; do
+            echo "::group::cargo publish --dry-run -p $crate"
+            if out=$(cargo publish --dry-run -p "$crate" 2>&1); then
+              echo "$out"
+              echo "$crate: OK"
+            else
+              echo "$out"
+              if echo "$out" | grep -q "no matching package named"; then
+                echo "$crate: SKIPPED — internal dependency not yet on crates.io (verifies after the first release)"
+              else
+                echo "$crate: FAILED"
+                echo "::endgroup::"
+                exit 1
+              fi
+            fi
+            echo "::endgroup::"
+          done

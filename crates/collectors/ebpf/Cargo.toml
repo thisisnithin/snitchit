@@ -1,0 +1,32 @@
+# snitchit eBPF kernel programs. Built SEPARATELY with a nightly toolchain +
+# bpf-linker to a BPF object that the userspace collector vendors via
+# include_bytes_aligned!. This crate is deliberately EXCLUDED from the main
+# workspace (see root Cargo.toml `exclude`) so the stable workspace build,
+# `cargo clippy --all-features`, and the macOS CI job never touch it and never
+# need nightly/bpf-linker. It is the only place `unsafe` lives.
+[package]
+name = "snitchit-ebpf"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "snitchit-ebpf"
+path = "src/main.rs"
+
+[dependencies]
+aya-ebpf = "0.1"
+
+[profile.dev]
+opt-level = 3
+debug = false
+panic = "abort"
+
+[profile.release]
+opt-level = 3
+debug = false
+panic = "abort"
+lto = true
+
+# Not a workspace member; carries no workspace lints (unsafe is required here).
+[workspace]

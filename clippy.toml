@@ -1,0 +1,4 @@
+# Tests are allowed to `unwrap`/`expect` (brief §8.2). Shipped code is not —
+# the restriction lints are set to `warn` in the workspace `Cargo.toml`.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true

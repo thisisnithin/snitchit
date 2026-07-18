@@ -1,0 +1,18 @@
+[package]
+name = "snitchit-agents"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Per-agent support for snitchit (Claude Code, OpenCode): hook-payload parsing and install/uninstall wiring. One module per agent — adding an agent touches only this crate."
+
+[dependencies]
+snitchit-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+dirs.workspace = true
+
+[lints]
+workspace = true
